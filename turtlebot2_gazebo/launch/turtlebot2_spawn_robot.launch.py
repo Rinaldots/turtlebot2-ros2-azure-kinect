@@ -21,7 +21,7 @@ def robot_state_publisher_launch(context, *args, **kwargs):
         package="turtlebot2_description").find("turtlebot2_description")
     launch_namespace = LaunchConfiguration('namespace').perform(context)
     urdf = (xacro.process_file(os.path.join(turtlebot2_description_package,
-                                            "robots/kobuki_hexagons_hokuyo.urdf.xacro"),
+                                            "robots/kobuki_hexagons_kinect.urdf.xacro"),
                                mappings={'namespace': launch_namespace}))
     pretty_urdf = urdf.toprettyxml(indent='   ')
 
@@ -54,8 +54,7 @@ def generate_launch_description():
 
     install_dir1 = get_package_prefix("turtlebot2_description")
     install_dir2 = get_package_prefix("kobuki_description")
-    gazebo_models_path1 = os.path.join(
-        turtlebot2_description_package, "meshes")
+    gazebo_models_path1 = os.path.join(turtlebot2_description_package, "meshes")
     gazebo_models_path2 = os.path.join(kobuki_description_package, "meshes")
 
     if "GAZEBO_MODEL_PATH" in os.environ:
@@ -92,9 +91,6 @@ def generate_launch_description():
         )
     else:
         os.environ["GAZEBO_PLUGIN_PATH"] = install_dir1 + "/lib"
-
-    print("GAZEBO MODELS PATH==" + str(os.environ["GAZEBO_MODEL_PATH"]))
-    print("GAZEBO PLUGINS PATH==" + str(os.environ["GAZEBO_PLUGIN_PATH"]))
 
     return LaunchDescription([
         DeclareLaunchArgument(
