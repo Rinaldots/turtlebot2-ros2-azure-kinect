@@ -32,7 +32,7 @@ def generate_launch_description():
             executable='ekf_node',
             output='screen',
             parameters=[ekf_config_params],
-            remappings=[("odometry/filtered", "odom")]
+            remappings=[("odometry/filtered", "/odom")]
         )
 
     robot_state_publisher_node = launch_ros.actions.Node(
@@ -41,7 +41,7 @@ def generate_launch_description():
         parameters=[{'robot_description': launch.substitutions.Command(['xacro ',os.path.join(turtlebot_description_package,'robots/kobuki_hexagons_hokuyo.urdf.xacro')])}]
     )
 
-    joint_state_publisher_node = launch_ros.actions.Node(
+    joint_state_publisher_node = launch_ros.Node(
         package='joint_state_publisher',
         executable='joint_state_publisher',
         name='joint_state_publisher'
