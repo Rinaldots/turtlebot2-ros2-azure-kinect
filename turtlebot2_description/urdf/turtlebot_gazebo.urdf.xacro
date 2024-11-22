@@ -2,7 +2,7 @@
 <robot name="turtlebot_gazebo" xmlns:xacro="http://ros.org/wiki/xacro">
   <!-- Microsoft Kinect / ASUS Xtion PRO Live for simulation -->
   <xacro:macro name="turtlebot_sim_3dsensor">
-  <xacro:arg name="namespace" default=""/>
+  <xacro:arg name="namespace" default="turtlebot"/>
   <xacro:property name="robot_namespace" value="/$(arg namespace)"/>  
     <gazebo reference="camera_link">  
       <sensor type="depth" name="camera1">
@@ -34,11 +34,17 @@
             <ros>
               <namespace>${robot_namespace}</namespace>   
               <!-- topics need to be prefixed with camera_name for remapping -->
-              <remapping>mycamera/image_raw:=camera/color/image_raw</remapping>
-              <remapping>mycamera/depth/image_raw:=camera/depth/image_raw</remapping>
-              <remapping>mycamera/camera_info:=camera/color/camera_info</remapping>
-              <remapping>mycamera/depth/camera_info:=camera/depth/camera_info</remapping>
-              <remapping>mycamera/points:=camera/depth/points</remapping>
+              <remapping>mycamera/image_raw:=image_raw</remapping>
+              <remapping>mycamera/depth/image_raw:=depth/image_raw</remapping>
+              <remapping>mycamera/camera_info:=camera_info</remapping>
+              <remapping>mycamera/depth/camera_info:=depth/camera_info</remapping>
+              <remapping>mycamera/depth/image_raw/compressed:=depth/image_raw/compressed</remapping>
+              <remapping>mycamera/depth/image_raw/compressedDepth:=depth/image_raw/compressedDepth</remapping>
+              <remapping>mycamera/image_raw/compressed:=image_raw/compressed</remapping>
+              <remapping>mycamera/image_raw/compressedDepth:=image_raw/compressedDepth</remapping>
+              <remapping>mycamera/image_raw/theora:=kinect/image_raw/theora</remapping>
+              <remapping>mycamera/points:=points</remapping>
+              <remapping>mycamera/depth/image_raw/theora:=depth/image_raw/theora</remapping>
             </ros>
 
             <!-- omit camera_name to default to sensor name -->
@@ -46,7 +52,7 @@
 
             <!-- frame_name>omit so it defaults to link name</frame_name-->
 
-            <min_depth>0.1</min_depth>
+            <min_depth>0.5</min_depth>
             <max_depth>500</max_depth>
           </plugin>
           <always_on>true</always_on>

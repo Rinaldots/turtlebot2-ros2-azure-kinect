@@ -11,30 +11,42 @@ def generate_launch_description():
     # Arguments
     namespace = LaunchConfiguration('namespace')  
     use_rviz = LaunchConfiguration('rviz')
-    pkg_kinect = get_package_share_directory('kinect_ros2')
-    default_rviz_config_path = os.path.join(pkg_kinect, "rviz/pointcloud.rviz")
+    pkg_bringup = get_package_share_directory('turtlebot2_bringup')
+    default_rviz_config_path = os.path.join(pkg_bringup, "config/pointcloud.rviz")
+    param_config = os.path.join(get_package_share_directory('turtlebot2_bringup'), 'config', 'param.yaml')
     
+
     declare_namespace_cmd = DeclareLaunchArgument(
-        'namespace', default_value='',
+        'namespace', default_value='turtlebot',
         description='Top-level namespace',)
-    
     use_rviz_argument = DeclareLaunchArgument(
         'rviz', default_value='false', 
         description='Open RViz.',)
+    
 
     bringup_cmd_group = GroupAction([
         # Include kinect
         Node(
-                package="kinect_ros2",
-                executable="kinect_ros2_node",
-                name="kinect_ros2",
-                namespace=namespace,),
+            package="kinect_ros2",
+            executable="kinect_ros2_node",
+            name="kinect_ros2",
+            namespace=namespace,),
         Node(
             package='rviz2',
             executable='rviz2',
             arguments=['-d', default_rviz_config_path],
             condition=IfCondition(use_rviz),
             namespace=namespace,),
+        Node(
+            package='depthimage_to_laserscan',
+            executable='depthimage_to_laserscan_node',
+            name='depthimage_to_laserscan',
+            remappings=[('depth', 'depth/image_raw'),
+                        ('depth_camera_info', 'depth/camera_info'),
+                        ('image', 'image_raw'),
+                        ('scan', 'scan')],
+            parameters=[param_config],
+            )
         ])
     
     ld = LaunchDescription()

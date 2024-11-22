@@ -6,9 +6,14 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
-        - /TF1
+        - /RobotModel1
+        - /RobotModel1/Mass Properties1
+        - /TF1/Frames1
+        - /TF1/Tree1
+        - /LaserScan1
+        - /LaserScan1/Status1
       Splitter Ratio: 0.5
-    Tree Height: 518
+    Tree Height: 634
 Visualization Manager:
   Class: ""
   Displays:
@@ -28,9 +33,9 @@ Visualization Manager:
         Z: 0
       Plane: XY
       Plane Cell Count: 10
-      Reference Frame: <Fixed Frame>
+      Reference Frame: base_link
       Value: true
-    - Alpha: 0.6000000238418579
+    - Alpha: 1
       Class: rviz_default_plugins/RobotModel
       Collision Enabled: false
       Description File: ""
@@ -40,7 +45,7 @@ Visualization Manager:
         Durability Policy: Volatile
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /robot_description
+        Value: /turtlebot/robot_description
       Enabled: true
       Links:
         All Links Enabled: true
@@ -57,6 +62,27 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
+        camera_depth_frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        camera_depth_optical_frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        camera_link:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+          Value: true
+        camera_rgb_frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
+        camera_rgb_optical_frame:
+          Alpha: 1
+          Show Axes: false
+          Show Trail: false
         caster_back_link:
           Alpha: 1
           Show Axes: false
@@ -83,11 +109,6 @@ Visualization Manager:
           Alpha: 1
           Show Axes: false
           Show Trail: false
-        laser:
-          Alpha: 1
-          Show Axes: false
-          Show Trail: false
-          Value: true
         plate_bottom_link:
           Alpha: 1
           Show Axes: false
@@ -193,6 +214,9 @@ Visualization Manager:
           Show Axes: false
           Show Trail: false
           Value: true
+      Mass Properties:
+        Inertia: false
+        Mass: false
       Name: RobotModel
       TF Prefix: ""
       Update Interval: 0
@@ -242,7 +266,7 @@ Visualization Manager:
         Filter size: 10
         History Policy: Keep Last
         Reliability Policy: Reliable
-        Value: /scan
+        Value: /turtlebot/scan
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
@@ -267,7 +291,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 6.156769275665283
+      Distance: 6.53612756729126
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -282,18 +306,18 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.7853981852531433
+      Pitch: 0.8353983759880066
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.7853981852531433
+      Yaw: 2.4754016399383545
     Saved: ~
 Window Geometry:
   Displays:
     collapsed: false
-  Height: 747
+  Height: 863
   Hide Left Dock: false
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd00000001000000000000015600000291fc0200000001fb000000100044006900730070006c006100790073010000003d00000291000000c900ffffff000003ca0000029100000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
-  Width: 1318
-  X: 110
-  Y: 65
+  QMainWindow State: 000000ff00000000fd00000001000000000000015600000305fc0200000001fb000000100044006900730070006c006100790073010000003d00000305000000c900ffffff000001c40000030500000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  Width: 800
+  X: 0
+  Y: 180

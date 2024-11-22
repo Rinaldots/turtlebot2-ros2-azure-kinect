@@ -1,0 +1,7 @@
+depthimage_to_laserscan:
+  ros__parameters:
+    scan_time: 0.033
+    range_min: 0.5
+    range_max: 3.0
+    scan_height: 30
+    output_frame: "camera_link"

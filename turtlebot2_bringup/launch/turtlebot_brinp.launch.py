@@ -13,7 +13,7 @@ import launch_ros.substitutions
 
 def generate_launch_description():
     kobuki_package = launch_ros.substitutions.FindPackageShare(package='kobuki_node').find('kobuki_node')
-    
+    urg_package = launch_ros.substitutions.FindPackageShare(package='urg_node').find('urg_node')
     turtlebot2_bringup_package = launch_ros.substitutions.FindPackageShare(package='turtlebot2_bringup').find('turtlebot2_bringup')
     turtlebot_description_package = launch_ros.substitutions.FindPackageShare(package='turtlebot2_description').find('turtlebot2_description')
 
@@ -32,8 +32,18 @@ def generate_launch_description():
             executable='ekf_node',
             output='screen',
             parameters=[ekf_config_params],
-            remappings=[("odometry/filtered", "/odom")]
+            remappings=[("odometry/filtered", "odom")]
         )
+
+    urg_node = launch.actions.IncludeLaunchDescription(
+        launch.launch_description_sources.PythonLaunchDescriptionSource(
+            os.path.join(
+                urg_package,
+                'launch/urg_node_launch.py'
+            )
+        ),
+        launch_arguments= {'sensor_interface':'ethernet'}.items()
+    )
 
     robot_state_publisher_node = launch_ros.actions.Node(
         package='robot_state_publisher',
@@ -41,7 +51,7 @@ def generate_launch_description():
         parameters=[{'robot_description': launch.substitutions.Command(['xacro ',os.path.join(turtlebot_description_package,'robots/kobuki_hexagons_hokuyo.urdf.xacro')])}]
     )
 
-    joint_state_publisher_node = launch_ros.Node(
+    joint_state_publisher_node = launch_ros.actions.Node(
         package='joint_state_publisher',
         executable='joint_state_publisher',
         name='joint_state_publisher'
@@ -63,9 +73,9 @@ def generate_launch_description():
             default_value='false',
             description='open rviz'),
         kobuki_node_launch,
-        
+        #urg_node,
         robot_state_publisher_node,
-        joint_state_publisher_node,
-        rviz_node,
-        ekf_node
+        #joint_state_publisher_node,
+        #rviz_node,
+        # ekf_node
     ])
