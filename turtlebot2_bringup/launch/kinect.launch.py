@@ -27,6 +27,11 @@ def generate_launch_description():
     bringup_cmd_group = GroupAction([
         # Include kinect
         Node(
+            package='tf2_ros', 
+            executable='static_transform_publisher', 
+            output='screen',
+            arguments=["0", "0", "0", "-1.57", "0", "-1.57", "camera_link", "kinect_rgb"]        ),
+        Node(
             package="kinect_ros2",
             executable="kinect_ros2_node",
             name="kinect_ros2",
@@ -54,6 +59,7 @@ def generate_launch_description():
      # Declare the launch options
     ld.add_action(declare_namespace_cmd),
     ld.add_action(use_rviz_argument),
+    
         
     # Add the actions to launch all of the navigation nodes
     ld.add_action(bringup_cmd_group),

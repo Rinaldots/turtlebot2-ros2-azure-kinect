@@ -9,8 +9,7 @@ import os
 import xacro
 
 def robot_state_publisher_launch(context, *args, **kwargs):
-    turtlebot2_description_package = FindPackageShare(
-        package="turtlebot2_description").find("turtlebot2_description")
+    turtlebot2_description_package = FindPackageShare(package="turtlebot2_description").find("turtlebot2_description")
     launch_namespace = LaunchConfiguration('namespace').perform(context)
     urdf = (xacro.process_file(os.path.join(turtlebot2_description_package,
                                             "robots/kobuki_hexagons_kinect.urdf.xacro"),
@@ -21,12 +20,10 @@ def robot_state_publisher_launch(context, *args, **kwargs):
         package="robot_state_publisher",
         executable="robot_state_publisher",
         namespace=LaunchConfiguration('namespace'),
-        remappings=[('/tf', 'tf'),
-                    ('/tf_static', 'tf_static'),
-                    ('/odom', 'odom')],
+        remappings=[('/odom', 'odom')],
         parameters=[
             {"robot_description": pretty_urdf},
-            {"use_sim_time": LaunchConfiguration('use_sim_time')},
+            {"use_sim_time": True},
         ],
     )
 
@@ -45,6 +42,8 @@ def generate_launch_description():
     kobuki_description_package = get_package_share_directory("kobuki_description")
     param_config = os.path.join(get_package_share_directory('turtlebot2_bringup'), 'config', 'param.yaml')
 
+    param2= {'use_sim_time': LaunchConfiguration('use_sim_time') }
+
     install_dir1 = get_package_prefix("turtlebot2_description")
     install_dir2 = get_package_prefix("kobuki_description")
 
@@ -57,7 +56,11 @@ def generate_launch_description():
     else:os.environ["GAZEBO_MODEL_PATH"] = (install_dir1 + "/share" + ":" + gazebo_models_path1)
     if "GAZEBO_PLUGIN_PATH" in os.environ:os.environ["GAZEBO_PLUGIN_PATH"] = (os.environ["GAZEBO_PLUGIN_PATH"] + ":" + install_dir1 + "/lib")
     else:os.environ["GAZEBO_PLUGIN_PATH"] = install_dir1 + "/lib"
-     
+    
+    tf_prefix = Node(package='tf2_ros', executable='static_transform_publisher', 
+            output='screen',arguments=["0", "0", "0", "-1.57", "0", "-1.57", "camera_link", "kinect_rgb"],
+            parameters=[param2],) 
+    
     gazebo_node = Node(
             package="gazebo_ros",
             executable="spawn_entity.py",
@@ -77,7 +80,7 @@ def generate_launch_description():
                     ('depth_camera_info', 'depth/camera_info'),
                     ('image', 'image_raw'),
                     ('scan', 'scan')],
-        parameters=[param_config],
+        parameters=[param_config,param2],
     )
 
 
@@ -86,6 +89,7 @@ def generate_launch_description():
         executable='joint_state_publisher',
         name='joint_state_publisher',
         namespace=namespace,
+        parameters=[param2]
     )
 
     return LaunchDescription([
@@ -94,6 +98,8 @@ def generate_launch_description():
         declare_use_timer,
         declare_x_pose,
         gazebo_node,
+        tf_prefix,
+        
         depthimage_to_laserscan_node,
         OpaqueFunction(function=robot_state_publisher_launch),
         joint_state_publisher_node,

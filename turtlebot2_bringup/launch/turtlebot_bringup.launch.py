@@ -32,7 +32,8 @@ def generate_launch_description():
         executable='kobuki_ros_node',
         parameters=[params],
         namespace='turtlebot',
-        remappings=[("commands/velocity", "cmd_vel")],
+        remappings=[("commands/velocity", "cmd_vel",),
+                    ("odom", "odom_turtle")],
     )
 
     ekf_node = launch_ros.actions.Node(

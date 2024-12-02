@@ -2,8 +2,6 @@
 <robot name="sensor_kinect" xmlns:xacro="http://ros.org/wiki/xacro">
   <xacro:include filename="$(find turtlebot2_description)/urdf/turtlebot_gazebo.urdf.xacro"/>
   <xacro:include filename="$(find turtlebot2_description)/urdf/turtlebot_properties.urdf.xacro"/>
-  <xacro:arg name="namespace" default=""/>
-  <xacro:property name="robot_namespace" value="/$(arg namespace)"/>
   <xacro:property name="kinect_cam_py" value="-0.0125"/>
   <!-- Parameterised in part by the values in turtlebot_properties.urdf.xacro -->
   <xacro:macro name="sensor_kinect" params="parent">

@@ -4,9 +4,10 @@
   <xacro:macro name="turtlebot_sim_3dsensor">
   <xacro:arg name="namespace" default="turtlebot"/>
   <xacro:property name="robot_namespace" value="/$(arg namespace)"/>  
+
     <gazebo reference="camera_link">  
       <sensor type="depth" name="camera1">
-          <update_rate>20</update_rate>
+          <update_rate>30</update_rate>
           <visualize>true</visualize>
           <camera>
             <horizontal_fov>0.74839718</horizontal_fov>
@@ -18,8 +19,8 @@
             <depth_camera>
             </depth_camera>
             <clip>
-              <near>0.05</near>
-              <far>3</far>
+              <near>0.5</near>
+              <far>7</far>
             </clip>
             <noise>
               <type>gaussian</type>
@@ -46,7 +47,8 @@
               <remapping>mycamera/points:=points</remapping>
               <remapping>mycamera/depth/image_raw/theora:=depth/image_raw/theora</remapping>
             </ros>
-
+            <body_name>kinect_rgb</body_name>
+            <frame_name>kinect_rgb</frame_name>
             <!-- omit camera_name to default to sensor name -->
             <camera_name>mycamera</camera_name>
 
@@ -56,7 +58,7 @@
             <max_depth>500</max_depth>
           </plugin>
           <always_on>true</always_on>
-          <frame_name>camera_link</frame_name>
+          >
         </sensor>
     </gazebo>
   </xacro:macro>
