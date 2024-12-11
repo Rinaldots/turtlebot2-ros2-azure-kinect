@@ -58,7 +58,7 @@
             <max_depth>500</max_depth>
           </plugin>
           <always_on>true</always_on>
-          >
+          
         </sensor>
     </gazebo>
   </xacro:macro>

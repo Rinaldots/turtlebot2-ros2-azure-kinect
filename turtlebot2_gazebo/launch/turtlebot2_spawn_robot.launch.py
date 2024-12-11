@@ -1,12 +1,15 @@
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
-from launch.substitutions import LaunchConfiguration
+from launch.substitutions import LaunchConfiguration, Command
 from launch_ros.actions import Node
+from ament_index_python import get_package_share_directory, get_package_share_path
 from launch_ros.substitutions import FindPackageShare
 from ament_index_python.packages import get_package_share_directory, get_package_prefix
 from launch.actions import OpaqueFunction
 import os
 import xacro
+import launch
+
 
 def robot_state_publisher_launch(context, *args, **kwargs):
     turtlebot2_description_package = FindPackageShare(package="turtlebot2_description").find("turtlebot2_description")
@@ -38,6 +41,7 @@ def generate_launch_description():
     namespace = LaunchConfiguration('namespace')
     x_pose = LaunchConfiguration('x_pose')
 
+    turtlebot2_gazebo_package = get_package_share_directory("turtlebot2_gazebo")
     turtlebot2_description_package = get_package_share_directory("turtlebot2_description")
     kobuki_description_package = get_package_share_directory("kobuki_description")
     param_config = os.path.join(get_package_share_directory('turtlebot2_bringup'), 'config', 'param.yaml')
@@ -50,6 +54,8 @@ def generate_launch_description():
     gazebo_models_path1 = os.path.join(turtlebot2_description_package, "meshes")
     gazebo_models_path2 = os.path.join(kobuki_description_package, "meshes")
 
+    ekf_config_params = os.path.join(turtlebot2_gazebo_package,'config/ekf_config.yaml')
+
     if "GAZEBO_MODEL_PATH" in os.environ:os.environ["GAZEBO_MODEL_PATH"] = (os.environ["GAZEBO_MODEL_PATH"]+ ":"+ install_dir2+ "/share"+ ":"+ gazebo_models_path2)
     else:os.environ["GAZEBO_MODEL_PATH"] = (install_dir2 + "/share" + ":" + gazebo_models_path2)
     if "GAZEBO_MODEL_PATH" in os.environ:os.environ["GAZEBO_MODEL_PATH"] = (os.environ["GAZEBO_MODEL_PATH"]+ ":"+ install_dir1+ "/share"+ ":"+ gazebo_models_path1)
@@ -59,7 +65,8 @@ def generate_launch_description():
     
     tf_prefix = Node(package='tf2_ros', executable='static_transform_publisher', 
             output='screen',arguments=["0", "0", "0", "-1.57", "0", "-1.57", "camera_link", "kinect_rgb"],
-            parameters=[param2],) 
+            parameters=[param2],
+            ) 
     
     gazebo_node = Node(
             package="gazebo_ros",
@@ -80,7 +87,7 @@ def generate_launch_description():
                     ('depth_camera_info', 'depth/camera_info'),
                     ('image', 'image_raw'),
                     ('scan', 'scan')],
-        parameters=[param_config,param2],
+        parameters=[param2],
     )
 
 
@@ -91,6 +98,8 @@ def generate_launch_description():
         namespace=namespace,
         parameters=[param2]
     )
+    
+    
 
     return LaunchDescription([
         
@@ -99,7 +108,6 @@ def generate_launch_description():
         declare_x_pose,
         gazebo_node,
         tf_prefix,
-        
         depthimage_to_laserscan_node,
         OpaqueFunction(function=robot_state_publisher_launch),
         joint_state_publisher_node,

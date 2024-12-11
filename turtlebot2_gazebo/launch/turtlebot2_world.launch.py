@@ -36,8 +36,9 @@ def generate_launch_description():
             os.path.join(turtlebot2_gazebo_package, "launch",
                          "turtlebot2_spawn_robot.launch.py")
         ),
-        launch_arguments={'namespace': namespace}.items()
     )
+
+    
 
     ld = LaunchDescription([
         DeclareLaunchArgument(

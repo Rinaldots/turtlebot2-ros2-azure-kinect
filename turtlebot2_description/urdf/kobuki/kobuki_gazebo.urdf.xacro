@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 
 <robot name="kobuki_sim" xmlns:xacro="http://ros.org/wiki/xacro">
-  <xacro:macro name="kobuki_sim">
   <xacro:arg name="namespace" default="turtlebot"/>
   <xacro:property name="robot_namespace" value="/$(arg namespace)"/>  
+  <xacro:macro name="kobuki_sim">
 	  <gazebo reference="wheel_left_link">
 	    <mu1>1.0</mu1>
 	    <mu2>1.0</mu2>
@@ -150,8 +150,9 @@
 	   <sensor type="imu" name="imu">
         <plugin name="gazebo_ros_imu_controller" filename="libgazebo_ros_imu_sensor.so">
           <ros>
-		  	<namespace>${robot_namespace}</namespace>
-            <remapping>~/out:=imu</remapping>
+		   	<namespace>${robot_namespace}</namespace>   
+            
+			<remapping>~/out:=sensor/imu_data</remapping>
           </ros>
           <output_type>sensor_msgs/msg/Imu</output_type>
           <body_name>gyro_link</body_name>
@@ -189,19 +190,20 @@
         <wheel_diameter>0.070</wheel_diameter>
         <max_wheel_torque>1.0</max_wheel_torque>
         <max_wheel_acceleration>1.0</max_wheel_acceleration>
-        <command_topic>cmd_vel</command_topic>
-        <!-- output -->
+        
 		<ros>
-			<namespace>${robot_namespace}</namespace>
-			<remapping>odom:=odom_turtle</remapping>
-		</ros>
-
+		   	<namespace>${robot_namespace}</namespace>   
+        
+        </ros>
+		<command_topic>cmd_vel</command_topic>
+        <!-- output -->
         <publish_odom>true</publish_odom>
         <publish_odom_tf>true</publish_odom_tf>
         <publish_wheel_tf>true</publish_wheel_tf>
-        <odometry_topic>odom</odometry_topic>
+        <odometry_topic>odom_turtle</odometry_topic>
         <odometry_frame>odom</odometry_frame>
         <robot_base_frame>base_link</robot_base_frame>
+		
 	    </plugin>
 	  </gazebo>
   </xacro:macro>
