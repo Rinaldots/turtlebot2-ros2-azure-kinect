@@ -10,10 +10,11 @@ def generate_launch_description():
     use_sim_time = LaunchConfiguration('use_sim_time')
 
     parameters = [{
-        'frame_id':'base_footprint',
+        'frame_id':'base_link',
         'subscribe_rgbd':True,
         'subscribe_odom':True,
         'approx_sync':True,
+        'use_sim_time': use_sim_time,
         'qos':1,
         'sync_queue_size': 10,
         'approx_sync_max_interval': 0.01,
@@ -25,13 +26,12 @@ def generate_launch_description():
         
 
         'use_action_for_goal':True,
-        'max_update_rate': '30',
+        'max_update_rate': '10',
         'min_update_rate': '1',
 
         'RGBD/ProximityBySpace':'true',
-        'RGBD/OptimizeFromGraphEnd':'false',
+        'RGBD/OptimizeFromGraphEnd':'true',
         'RGBD/ProximityPathMaxNeighbors':'0',
-        ''
 
         'Reg/Strategy':'0',
         'Reg/Force3DoF':'true',
@@ -45,7 +45,7 @@ def generate_launch_description():
 
         'Mem/RehearsalSimilarity':'0.3',
         'GrigGlobal/MinSize':'20',
-        
+        'Grid/RayTracing':'true',
         'Grid/3D':'false', # Use 2D occupancy
         'Grid/NormalsSegmentation':'false', # Use passthrough filter to detect obstacles
         'Grid/MaxGroundHeight':'0.05', # All points above 5 cm are obstacles
@@ -57,6 +57,7 @@ def generate_launch_description():
         ('rgb/camera_info', 'depth/camera_info'),
         ('depth/image', 'depth/image_raw'),
         ('odom', 'odom'),
+        ('map', '/map')
     ]
 
     declare_namespace_cmd = DeclareLaunchArgument(
@@ -97,12 +98,14 @@ def generate_launch_description():
         parameters=[{'decimation': 2,
                      'max_depth': 3.0,
                      'voxel_size': 0.02}],
+        namespace=namespace,
         remappings=[('depth/image', 'depth/image_raw'),
                     ('cloud', 'depth/cloud')])
 
     rtabmap_util2 = Node(
         package='rtabmap_util', executable='obstacles_detection', output='screen',
         parameters=parameters,
+        namespace=namespace,
         remappings=[('cloud', 'depth/cloud'),
                     ('obstacles', 'depth/obstacles'),
                     ('ground', 'depth/ground')])

@@ -27,6 +27,7 @@ def robot_state_publisher_launch(context, *args, **kwargs):
         parameters=[
             {"robot_description": pretty_urdf},
             {"use_sim_time": True},
+            {'publish_frequency': 30.0},
         ],
     )
 
@@ -63,11 +64,6 @@ def generate_launch_description():
     if "GAZEBO_PLUGIN_PATH" in os.environ:os.environ["GAZEBO_PLUGIN_PATH"] = (os.environ["GAZEBO_PLUGIN_PATH"] + ":" + install_dir1 + "/lib")
     else:os.environ["GAZEBO_PLUGIN_PATH"] = install_dir1 + "/lib"
     
-    tf_prefix = Node(package='tf2_ros', executable='static_transform_publisher', 
-            output='screen',arguments=["0", "0", "0", "-1.57", "0", "-1.57", "camera_link", "kinect_rgb"],
-            parameters=[param2],
-            ) 
-    
     gazebo_node = Node(
             package="gazebo_ros",
             executable="spawn_entity.py",
@@ -96,7 +92,7 @@ def generate_launch_description():
         executable='joint_state_publisher',
         name='joint_state_publisher',
         namespace=namespace,
-        parameters=[param2]
+        parameters=[param2],
     )
     
     
@@ -107,7 +103,6 @@ def generate_launch_description():
         declare_use_timer,
         declare_x_pose,
         gazebo_node,
-        tf_prefix,
         depthimage_to_laserscan_node,
         OpaqueFunction(function=robot_state_publisher_launch),
         joint_state_publisher_node,

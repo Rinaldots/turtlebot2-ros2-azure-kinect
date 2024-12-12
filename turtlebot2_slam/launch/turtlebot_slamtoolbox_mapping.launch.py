@@ -26,7 +26,7 @@ def generate_launch_description():
         
 
         'use_action_for_goal':True,
-        'max_update_rate': '30',
+        'max_update_rate': '10',
 
         'RGBD/ProximityBySpace':'true',
         'RGBD/OptimizeFromGraphEnd':'false',
@@ -97,12 +97,14 @@ def generate_launch_description():
         parameters=[{'decimation': 2,
                      'max_depth': 3.0,
                      'voxel_size': 0.02}],
+        namespace=namespace,
         remappings=[('depth/image', 'depth/image_raw'),
                     ('cloud', 'depth/cloud')])
 
     rtabmap_util2 = Node(
         package='rtabmap_util', executable='obstacles_detection', output='screen',
         parameters=parameters,
+        namespace=namespace,
         remappings=[('cloud', 'depth/cloud'),
                     ('obstacles', 'depth/obstacles'),
                     ('ground', 'depth/ground')])
