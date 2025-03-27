@@ -18,19 +18,17 @@ def generate_launch_description():
         'qos':1,
         'sync_queue_size': 10,
         'approx_sync_max_interval': 0.01,
-        'publish_tf_map': 'true',
+        'publish_tf_map': True,
         'imu_topic':'sensor/imu_data',
         'odom_frame_id':'odom',
         'odom_tf_linear_variance':0.001,
         'odom_tf_angular_variance':0.001,
-        
 
-        'use_action_for_goal':True,
         'max_update_rate': '10',
         'min_update_rate': '1',
 
         'RGBD/ProximityBySpace':'true',
-        'RGBD/OptimizeFromGraphEnd':'true',
+        'RGBD/OptimizeFromGraphEnd':'false',
         'RGBD/ProximityPathMaxNeighbors':'0',
 
         'Reg/Strategy':'0',
@@ -119,6 +117,6 @@ def generate_launch_description():
         rtabmap_odom,
         rtabmap_slam,
         # rtabmap_viz,
-        rtabmap_util,
-        rtabmap_util2,
+        #rtabmap_util,
+        #rtabmap_util2,
     ])

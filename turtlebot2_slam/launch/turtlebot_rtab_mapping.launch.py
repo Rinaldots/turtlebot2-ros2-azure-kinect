@@ -13,26 +13,24 @@ def generate_launch_description():
         'frame_id':'base_footprint',
         'subscribe_rgbd':True,
         'subscribe_odom':True,
+        #'subscribe_sensor_data':True,
+
         'approx_sync':True,
         'qos':1,
         'sync_queue_size': 10,
         'approx_sync_max_interval': 0.01,
-        'publish_tf_map': 'true',
+        'publish_tf_map': True,
         'imu_topic':'sensor/imu_data',
         'odom_frame_id':'odom',
         'odom_tf_linear_variance':0.001,
         'odom_tf_angular_variance':0.001,
-        
-
-        'use_action_for_goal':True,
-        'max_update_rate': '30',
-        'min_update_rate': '1',
+        'max_update_rate': 15.0,
+        'min_update_rate': 5.0,
 
         'RGBD/ProximityBySpace':'true',
         'RGBD/OptimizeFromGraphEnd':'false',
         'RGBD/ProximityPathMaxNeighbors':'0',
-        ''
-
+        
         'Reg/Strategy':'0',
         'Reg/Force3DoF':'true',
 
@@ -44,8 +42,10 @@ def generate_launch_description():
         'Rtabmap/TImeThr':'0.0',
 
         'Mem/RehearsalSimilarity':'0.3',
+        'map_always_update':True,
+
         'GrigGlobal/MinSize':'20',
-        
+        'Grid/RayTracing':'true',
         'Grid/3D':'false', # Use 2D occupancy
         'Grid/NormalsSegmentation':'false', # Use passthrough filter to detect obstacles
         'Grid/MaxGroundHeight':'0.05', # All points above 5 cm are obstacles
@@ -56,7 +56,10 @@ def generate_launch_description():
         ('rgb/image', 'image_raw'),
         ('rgb/camera_info', 'depth/camera_info'),
         ('depth/image', 'depth/image_raw'),
-        ('odom', 'odom'),
+        ('odom_info', 'odom_filtered'),
+        ('odom', 'odom_rtab'),
+        ('map', '/map'),
+        ('imu', 'sensors/imu_data'),
     ]
 
     declare_namespace_cmd = DeclareLaunchArgument(
@@ -66,6 +69,7 @@ def generate_launch_description():
               arguments=["0", "0", "0", "-1.57", "0", "-1.57", 'camera_rgb_frame', 'kinect_rgb'], output='screen')
     tf2 = Node(package='tf2_ros', executable='static_transform_publisher',
                arguments=["0", "0", "0", "-1.57", "0", "-1.57", 'camera_depth_frame', 'kinect_depth'], output='screen')
+    
 
     rtabmap_sync = Node(
         package='rtabmap_sync', executable='rgbd_sync', output='screen',
@@ -77,6 +81,7 @@ def generate_launch_description():
         package='rtabmap_odom', executable='rgbd_odometry', output='screen',
         arguments=['-d'],
         parameters=parameters,
+        remappings=remappings,
         namespace=namespace)
 
     rtabmap_slam = Node(
@@ -92,21 +97,6 @@ def generate_launch_description():
         namespace=namespace,
         remappings=remappings)
 
-    rtabmap_util = Node(
-        package='rtabmap_util', executable='point_cloud_xyz', output='screen',
-        parameters=[{'decimation': 2,
-                     'max_depth': 3.0,
-                     'voxel_size': 0.02}],
-        remappings=[('depth/image', 'depth/image_raw'),
-                    ('cloud', 'depth/cloud')])
-
-    rtabmap_util2 = Node(
-        package='rtabmap_util', executable='obstacles_detection', output='screen',
-        parameters=parameters,
-        remappings=[('cloud', 'depth/cloud'),
-                    ('obstacles', 'depth/obstacles'),
-                    ('ground', 'depth/ground')])
-
     return LaunchDescription([
         tf,
         tf2,
@@ -115,7 +105,6 @@ def generate_launch_description():
         rtabmap_sync,
         rtabmap_odom,
         rtabmap_slam,
-        # rtabmap_viz,
-        rtabmap_util,
-        rtabmap_util2,
+        rtabmap_viz,
+
     ])

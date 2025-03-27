@@ -1,123 +1,70 @@
+import os
+
+from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument
-from launch.substitutions import LaunchConfiguration
-from launch_ros.actions import Node
+from launch.actions import (DeclareLaunchArgument, EmitEvent, LogInfo,
+                            RegisterEventHandler)
+from launch.conditions import IfCondition
+from launch.events import matches_action
+from launch.substitutions import (AndSubstitution, LaunchConfiguration,
+                                  NotSubstitution)
+from launch_ros.actions import LifecycleNode
+from launch_ros.event_handlers import OnStateTransition
+from launch_ros.events.lifecycle import ChangeState
+from lifecycle_msgs.msg import Transition
 
 
 def generate_launch_description():
-    namespace = LaunchConfiguration('namespace')
-    declare_use_timer = DeclareLaunchArgument('use_sim_time', default_value='true', description='Whether to use Gazebo clock')
+    autostart = LaunchConfiguration('autostart')
+    use_lifecycle_manager = LaunchConfiguration("use_lifecycle_manager")
     use_sim_time = LaunchConfiguration('use_sim_time')
+    slam_params_file = LaunchConfiguration('slam_params_file')
 
-    parameters = [{
-        'frame_id':'base_link',
-        'subscribe_rgbd':True,
-        'subscribe_odom':True,
-        'approx_sync':True,
-        'use_sim_time': use_sim_time,
-        'qos':1,
-        'sync_queue_size': 10,
-        'approx_sync_max_interval': 0.01,
-        'publish_tf_map': 'true',
-        'imu_topic':'sensor/imu_data',
-        'odom_frame_id':'odom',
-        'odom_tf_linear_variance':0.001,
-        'odom_tf_angular_variance':0.001,
-        
+    declare_autostart_cmd = DeclareLaunchArgument('autostart', default_value='true', description='Automatically startup the slamtoolbox. ' 'Ignored when use_lifecycle_manager is true.')
+    declare_use_lifecycle_manager = DeclareLaunchArgument('use_lifecycle_manager', default_value='false',description='Enable bond connection during node activation')
+    declare_use_sim_time_argument = DeclareLaunchArgument('use_sim_time',default_value='false',description='Use simulation/Gazebo clock')
+    declare_slam_params_file_cmd = DeclareLaunchArgument('slam_params_file', default_value=os.path.join(get_package_share_directory("turtlebot2_slam"),'config', 'slam_toolbox_params.yaml'), description='Full path to the ROS2 parameters file to use for the slam_toolbox node')
+    
+    start_async_slam_toolbox_node = LifecycleNode(
+        parameters=[slam_params_file,{'use_lifecycle_manager': use_lifecycle_manager,'use_sim_time': use_sim_time } ],
+        package='slam_toolbox',
+        executable='async_slam_toolbox_node',
+        name='slam_toolbox',
+        output='screen',
+        namespace='')
 
-        'use_action_for_goal':True,
-        'max_update_rate': '10',
+    configure_event = EmitEvent(
+        event=ChangeState(
+          lifecycle_node_matcher=matches_action(start_async_slam_toolbox_node),
+          transition_id=Transition.TRANSITION_CONFIGURE
+        ),
+        condition=IfCondition(AndSubstitution(autostart, NotSubstitution(use_lifecycle_manager)))
+    )
 
-        'RGBD/ProximityBySpace':'true',
-        'RGBD/OptimizeFromGraphEnd':'false',
-        'RGBD/ProximityPathMaxNeighbors':'0',
-        ''
+    activate_event = RegisterEventHandler(
+        OnStateTransition(
+            target_lifecycle_node=start_async_slam_toolbox_node,
+            start_state="configuring",
+            goal_state="inactive",
+            entities=[
+                LogInfo(msg="[LifecycleLaunch] Slamtoolbox node is activating."),
+                EmitEvent(event=ChangeState(
+                    lifecycle_node_matcher=matches_action(start_async_slam_toolbox_node),
+                    transition_id=Transition.TRANSITION_ACTIVATE
+                ))
+            ]
+        ),
+        condition=IfCondition(AndSubstitution(autostart, NotSubstitution(use_lifecycle_manager)))
+    )
 
-        'Reg/Strategy':'0',
-        'Reg/Force3DoF':'true',
+    ld = LaunchDescription()
 
-        "Icp/CorrespondenceRatio":'0.3',
+    ld.add_action(declare_autostart_cmd)
+    ld.add_action(declare_use_lifecycle_manager)
+    ld.add_action(declare_use_sim_time_argument)
+    ld.add_action(declare_slam_params_file_cmd)
+    ld.add_action(start_async_slam_toolbox_node)
+    ld.add_action(configure_event)
+    ld.add_action(activate_event)
 
-        'Vis/MinInliers':'15',
-        'Vis/InlierDistance':'0.1',
-        
-        'Rtabmap/TImeThr':'0.0',
-
-        'Mem/RehearsalSimilarity':'0.3',
-        'GrigGlobal/MinSize':'20',
-        
-        'Grid/3D':'false', # Use 2D occupancy
-        'Grid/NormalsSegmentation':'false', # Use passthrough filter to detect obstacles
-        'Grid/MaxGroundHeight':'0.05', # All points above 5 cm are obstacles
-        'Grid/MaxObstacleHeight':'0.6',  # All points over 1 meter are ignored
-    }]
-
-    remappings = [
-        ('rgb/image', 'image_raw'),
-        ('rgb/camera_info', 'depth/camera_info'),
-        ('depth/image', 'depth/image_raw'),
-        ('odom', 'odom'),
-    ]
-
-    declare_namespace_cmd = DeclareLaunchArgument(
-        'namespace', default_value='turtlebot', description='Top-level namespace')
-
-    tf = Node(package='tf2_ros', executable='static_transform_publisher',
-              arguments=["0", "0", "0", "-1.57", "0", "-1.57", 'camera_rgb_frame', 'kinect_rgb'], output='screen')
-    tf2 = Node(package='tf2_ros', executable='static_transform_publisher',
-               arguments=["0", "0", "0", "-1.57", "0", "-1.57", 'camera_depth_frame', 'kinect_depth'], output='screen')
-
-    rtabmap_sync = Node(
-        package='rtabmap_sync', executable='rgbd_sync', output='screen',
-        parameters=parameters,
-        remappings=remappings,
-        namespace=namespace)
-
-    rtabmap_odom = Node(
-        package='rtabmap_odom', executable='rgbd_odometry', output='screen',
-        arguments=['-d'],
-        parameters=parameters,
-        namespace=namespace)
-
-    rtabmap_slam = Node(
-        package='rtabmap_slam', executable='rtabmap', output='screen',
-        parameters=parameters,
-        arguments=['-d'],
-        namespace=namespace,
-        remappings=remappings)
-
-    rtabmap_viz = Node(
-        package='rtabmap_viz', executable='rtabmap_viz', output='screen',
-        parameters=parameters,
-        namespace=namespace,
-        remappings=remappings)
-
-    rtabmap_util = Node(
-        package='rtabmap_util', executable='point_cloud_xyz', output='screen',
-        parameters=[{'decimation': 2,
-                     'max_depth': 3.0,
-                     'voxel_size': 0.02}],
-        namespace=namespace,
-        remappings=[('depth/image', 'depth/image_raw'),
-                    ('cloud', 'depth/cloud')])
-
-    rtabmap_util2 = Node(
-        package='rtabmap_util', executable='obstacles_detection', output='screen',
-        parameters=parameters,
-        namespace=namespace,
-        remappings=[('cloud', 'depth/cloud'),
-                    ('obstacles', 'depth/obstacles'),
-                    ('ground', 'depth/ground')])
-
-    return LaunchDescription([
-        tf,
-        tf2,
-        declare_namespace_cmd,
-        declare_use_timer,
-        rtabmap_sync,
-        rtabmap_odom,
-        rtabmap_slam,
-        # rtabmap_viz,
-        rtabmap_util,
-        rtabmap_util2,
-    ])
+    return ld
