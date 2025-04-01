@@ -23,7 +23,7 @@
 #### Kinect ROS2:
 
     cd src/
-    git clone https://github.com/fadlio/kinect_ros2
+    git clone https://github.com/Rinaldots/kinect_ros2
     cd ..
     rosdep install --from-paths src --ignore-src -r
 #### Pacote Turtlebot2 Azure:
