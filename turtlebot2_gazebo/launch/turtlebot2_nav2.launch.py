@@ -54,7 +54,7 @@ def generate_launch_description():
             default_value=map_dir,
             description='Full path to map file to load'),
 
-        DeclareLaunchArgument(
+        DeclareLaunchArgument(nav2_bringup
             'params_file',
             default_value=param_dir,
             description='Full path to param file to load'),
