@@ -8,6 +8,8 @@ def generate_launch_description():
     namespace = LaunchConfiguration('namespace')
     declare_use_timer = DeclareLaunchArgument('use_sim_time', default_value='true', description='Whether to use Gazebo clock')
     use_sim_time = LaunchConfiguration('use_sim_time')
+    declare_namespace_cmd = DeclareLaunchArgument(
+        'namespace', default_value='turtlebot', description='Top-level namespace')
 
     parameters = [{
         'frame_id':'base_footprint',
@@ -24,8 +26,8 @@ def generate_launch_description():
         'odom_frame_id':'odom',
         'odom_tf_linear_variance':0.001,
         'odom_tf_angular_variance':0.001,
-        'max_update_rate': 15.0,
-        'min_update_rate': 5.0,
+        'max_update_rate': 5.0,
+        'min_update_rate': 3.0,
 
         'RGBD/ProximityBySpace':'true',
         'RGBD/OptimizeFromGraphEnd':'false',
@@ -53,30 +55,14 @@ def generate_launch_description():
     }]
 
     remappings = [
-        ('rgb/image', 'image_raw'),
-        ('rgb/camera_info', 'depth/camera_info'),
-        ('depth/image', 'depth/image_raw'),
         ('odom_info', 'odom_filtered'),
         ('odom', 'odom_rtab'),
         ('map', '/map'),
         ('imu', 'sensors/imu_data'),
+        ('rgb/image', 'image_raw'),
+        ('rgb/camera_info', 'depth/camera_info'),
+        ('depth/image', 'depth/image_raw'),
     ]
-
-    declare_namespace_cmd = DeclareLaunchArgument(
-        'namespace', default_value='turtlebot', description='Top-level namespace')
-
-    tf = Node(package='tf2_ros', executable='static_transform_publisher',
-              arguments=["0", "0", "0", "-1.57", "0", "-1.57", 'camera_rgb_frame', 'kinect_rgb'], output='screen')
-    tf2 = Node(package='tf2_ros', executable='static_transform_publisher',
-               arguments=["0", "0", "0", "-1.57", "0", "-1.57", 'camera_depth_frame', 'kinect_depth'], output='screen')
-    
-
-    rtabmap_sync = Node(
-        package='rtabmap_sync', executable='rgbd_sync', output='screen',
-        parameters=parameters,
-        remappings=remappings,
-        namespace=namespace)
-
     rtabmap_odom = Node(
         package='rtabmap_odom', executable='rgbd_odometry', output='screen',
         arguments=['-d'],
@@ -98,11 +84,8 @@ def generate_launch_description():
         remappings=remappings)
 
     return LaunchDescription([
-        tf,
-        tf2,
         declare_namespace_cmd,
         declare_use_timer,
-        rtabmap_sync,
         rtabmap_odom,
         rtabmap_slam,
         rtabmap_viz,
