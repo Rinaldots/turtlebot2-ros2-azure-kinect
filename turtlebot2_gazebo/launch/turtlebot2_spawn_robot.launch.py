@@ -42,25 +42,53 @@ def generate_launch_description():
     namespace = LaunchConfiguration('namespace')
     x_pose = LaunchConfiguration('x_pose')
 
-    turtlebot2_gazebo_package = get_package_share_directory("turtlebot2_gazebo")
-    turtlebot2_description_package = get_package_share_directory("turtlebot2_description")
-    kobuki_description_package = get_package_share_directory("kobuki_description")
-    param_config = os.path.join(get_package_share_directory('turtlebot2_bringup'), 'config', 'param.yaml')
+    
+    turtlebot2_description_share = get_package_share_directory("turtlebot2_description")
+    kobuki_description_share = get_package_share_directory("kobuki_description")
+    install_dir1 = get_package_prefix("turtlebot2_description")
 
     param2= {'use_sim_time': LaunchConfiguration('use_sim_time') }
 
-    install_dir1 = get_package_prefix("turtlebot2_description")
-    install_dir2 = get_package_prefix("kobuki_description")
+    # --- GAZEBO_MODEL_PATH modifications ---
+    # To reduce "Missing model.config" errors, be more specific.
+    # Only add paths that are actual Gazebo model directories.
+    # If your packages have a 'models' subdirectory in their share path, use that.
+    # Example:
+    # kobuki_models_path = os.path.join(kobuki_description_share, "models")
+    # turtlebot2_models_path = os.path.join(turtlebot2_description_share, "models")
+    #
+    # model_paths = [kobuki_models_path, turtlebot2_models_path] # Add other custom model paths
+    # current_gazebo_model_path = os.environ.get("GAZEBO_MODEL_PATH", "")
+    # additional_model_paths = ":".join(p for p in model_paths if os.path.isdir(p))
+    #
+    # if additional_model_paths:
+    #     if current_gazebo_model_path:
+    #         os.environ["GAZEBO_MODEL_PATH"] = current_gazebo_model_path + ":" + additional_model_paths
+    #     else:
+    #         os.environ["GAZEBO_MODEL_PATH"] = additional_model_paths
 
-    gazebo_models_path1 = os.path.join(turtlebot2_description_package, "meshes")
-    gazebo_models_path2 = os.path.join(kobuki_description_package, "meshes")
+    # For now, let's comment out the broad additions to GAZEBO_MODEL_PATH to minimize warnings.
+    # The robot is spawned from /robot_description topic, not directly from these paths.
+    # install_dir1_prefix = get_package_prefix("turtlebot2_description")
+    # install_dir2_prefix = get_package_prefix("kobuki_description")
+    # gazebo_models_path1 = os.path.join(turtlebot2_description_share, "meshes") # Meshes are not models
+    # gazebo_models_path2 = os.path.join(kobuki_description_share, "meshes")   # Meshes are not models
+    # if "GAZEBO_MODEL_PATH" in os.environ:os.environ["GAZEBO_MODEL_PATH"] = (os.environ["GAZEBO_MODEL_PATH"]+ ":"+ install_dir2_prefix+ "/share"+ ":"+ gazebo_models_path2)
+    # else:os.environ["GAZEBO_MODEL_PATH"] = (install_dir2_prefix + "/share" + ":" + gazebo_models_path2)
+    # if "GAZEBO_MODEL_PATH" in os.environ:os.environ["GAZEBO_MODEL_PATH"] = (os.environ["GAZEBO_MODEL_PATH"]+ ":"+ install_dir1_prefix+ "/share"+ ":"+ gazebo_models_path1)
+    # else:os.environ["GAZEBO_MODEL_PATH"] = (install_dir1_prefix + "/share" + ":" + gazebo_models_path1)
 
-    ekf_config_params = os.path.join(turtlebot2_gazebo_package,'config/ekf_config.yaml')
+    # --- GAZEBO_PLUGIN_PATH modifications ---
+    # Standard plugins should be found if gazebo_ros_pkgs is installed and sourced.
+    # This is for custom-compiled plugins.
+    # install_dir1_lib = os.path.join(get_package_prefix("turtlebot2_description"), "lib")
+    # if "GAZEBO_PLUGIN_PATH" in os.environ:
+    #     if install_dir1_lib not in os.environ["GAZEBO_PLUGIN_PATH"]:
+    #         os.environ["GAZEBO_PLUGIN_PATH"] = (os.environ["GAZEBO_PLUGIN_PATH"] + ":" + install_dir1_lib)
+    # else:
+    #     os.environ["GAZEBO_PLUGIN_PATH"] = install_dir1_lib
+    # Commenting this out to rely on system paths for standard plugins first.
 
-    if "GAZEBO_MODEL_PATH" in os.environ:os.environ["GAZEBO_MODEL_PATH"] = (os.environ["GAZEBO_MODEL_PATH"]+ ":"+ install_dir2+ "/share"+ ":"+ gazebo_models_path2)
-    else:os.environ["GAZEBO_MODEL_PATH"] = (install_dir2 + "/share" + ":" + gazebo_models_path2)
-    if "GAZEBO_MODEL_PATH" in os.environ:os.environ["GAZEBO_MODEL_PATH"] = (os.environ["GAZEBO_MODEL_PATH"]+ ":"+ install_dir1+ "/share"+ ":"+ gazebo_models_path1)
-    else:os.environ["GAZEBO_MODEL_PATH"] = (install_dir1 + "/share" + ":" + gazebo_models_path1)
     if "GAZEBO_PLUGIN_PATH" in os.environ:os.environ["GAZEBO_PLUGIN_PATH"] = (os.environ["GAZEBO_PLUGIN_PATH"] + ":" + install_dir1 + "/lib")
     else:os.environ["GAZEBO_PLUGIN_PATH"] = install_dir1 + "/lib"
     
